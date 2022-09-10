@@ -1,21 +1,33 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Infrastructure.Data;
+using Core.Entities;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers
 {
     public class ProductsController : BaseController
     {
+        private readonly StoreContext _context;
+
+        public ProductsController(StoreContext context)
+        {
+            _context = context;
+        }
+
         [HttpGet]
         [Route("all")]
-        public string GetProducts()
+        public async Task<ActionResult<List<Product>>> GetProducts()
         {
-            return "Hi";
+            var products = await _context.Products.ToListAsync();
+            return Ok(products);
         }
 
         [HttpGet]
         [Route("{id}")]
-        public string GetProduct(int id)
+        public async Task<ActionResult<Product>> GetProduct(int id)
         {
-            return "Meu produto";
+            var product = await _context.Products.FindAsync(id);
+            return Ok(product);
         }
     }
 }
