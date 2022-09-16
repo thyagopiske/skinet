@@ -1,3 +1,4 @@
+using Api.Helpers;
 using Core.Interfaces;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,7 @@ builder.Services.AddDbContext<StoreContext>(op =>
     op.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+builder.Services.AddAutoMapper(typeof(MappingProfiles));
 
 //Core interfaces
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
@@ -51,6 +53,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.UseAuthorization();
 

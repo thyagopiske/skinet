@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Core.Interfaces;
 using Core.Specifications;
 using Api.Dtos;
+using AutoMapper;
 
 namespace Api.Controllers
 {
@@ -13,33 +14,27 @@ namespace Api.Controllers
         private readonly IGenericRepository<Product> _productsRepo;
         private readonly IGenericRepository<ProductBrand> _productBrandsRepo;
         private readonly IGenericRepository<ProductType> _productTypesRepo;
+        private readonly IMapper _mapper;
 
         public ProductsController(
             IGenericRepository<Product> productsRepo, 
             IGenericRepository<ProductBrand> productBrandsRepo,
-            IGenericRepository<ProductType> productTypesRepo)
+            IGenericRepository<ProductType> productTypesRepo,
+            IMapper mapper)
         {
             _productsRepo = productsRepo;
             _productBrandsRepo = productBrandsRepo;
             _productTypesRepo = productTypesRepo;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Product>>> GetProducts()
+        public async Task<ActionResult<IReadOnlyList<Product>>> GetProducts()
         {
             var spec = new ProductsWithTypesAndBrandsSpecification();
             var products = await _productsRepo.ListAsync(spec);
 
-            var productsDto = products.Select(product => new ProductToReturnDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                PictureUrl = product.PictureUrl,
-                Price = product.Price,
-                ProductBrand = product.ProductBrand.Name,
-                ProductType = product.ProductType.Name
-            }).ToList();
+            var productsDto = _mapper.Map<List<ProductToReturnDto>>(products);
 
             return Ok(productsDto);
         }
@@ -51,16 +46,7 @@ namespace Api.Controllers
             var spec = new ProductsWithTypesAndBrandsSpecification(id);
             var product = await _productsRepo.GetEntityWithSpec(spec);
 
-            var productDto = new ProductToReturnDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                PictureUrl = product.PictureUrl,
-                Price = product.Price,
-                ProductBrand = product.ProductBrand.Name,
-                ProductType = product.ProductType.Name
-            };
+            var productDto = _mapper.Map<ProductToReturnDto>(product);
 
             return Ok(productDto);
         }
