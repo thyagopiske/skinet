@@ -6,6 +6,8 @@ using Core.Interfaces;
 using Core.Specifications;
 using Api.Dtos;
 using AutoMapper;
+using Api.Errors;
+using System.Net;
 
 namespace Api.Controllers
 {
@@ -41,10 +43,17 @@ namespace Api.Controllers
 
         [HttpGet]
         [Route("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ProductToReturnDto>> GetProduct(int id)
         {
             var spec = new ProductsWithTypesAndBrandsSpecification(id);
             var product = await _productsRepo.GetEntityWithSpec(spec);
+
+            if (product == null)
+            {
+                return NotFound(new ApiResponse((int) HttpStatusCode.NotFound));
+            }
 
             var productDto = _mapper.Map<ProductToReturnDto>(product);
 
