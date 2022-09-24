@@ -1,9 +1,7 @@
-using Api.Errors;
+using Api.Extensions;
 using Api.Helpers;
 using Api.Middlewares;
-using Core.Interfaces;
 using Infrastructure.Data;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,30 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
+builder.Services.AddSwaggerDocumentation();
 
-//Customize the validation errors response on bad request
-builder.Services.Configure<ApiBehaviorOptions>(options =>
-{
-    options.InvalidModelStateResponseFactory = actionContext =>
-    {
-        var errors = actionContext.ModelState
-                        .Where(e => e.Value.Errors.Count > 0)
-                        .SelectMany(x => x.Value.Errors)
-                        .Select(x => x.ErrorMessage)
-                        .ToArray();
-
-        var errorResponse = new ApiValidationErrorResponse
-        {
-            Errors = errors
-        };
-
-        return new BadRequestObjectResult(errorResponse);
-    };
-});
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddApplicationServicesExtensions();
 
 //Database connection
 builder.Services.AddDbContext<StoreContext>(op =>
@@ -44,10 +21,6 @@ builder.Services.AddDbContext<StoreContext>(op =>
 });
 
 builder.Services.AddAutoMapper(typeof(MappingProfiles));
-
-//Core interfaces
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 var app = builder.Build();
 
@@ -76,8 +49,7 @@ app.UseMiddleware<ExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerDocumentation();
 }
 
 app.UseStatusCodePagesWithReExecute("/errors/{0}");
