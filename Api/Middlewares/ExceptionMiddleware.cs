@@ -33,7 +33,7 @@ namespace Api.Middlewares
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
                 var responseBody = _env.IsDevelopment()
-                    ? new ApiException((int)HttpStatusCode.InternalServerError, ex.Message, $"File: {frame.GetFileName().Split("\\").Last()}; Method: {frame.GetMethod().Name}; Line: {frame.GetFileLineNumber()}")
+                    ? new ApiException((int)HttpStatusCode.InternalServerError, ex.Message, $"File: {frame?.GetFileName()?.Split("\\")?.Last()}; Method: {frame?.GetMethod()?.Name}; Line: {frame?.GetFileLineNumber()}")
                     : new ApiException((int)HttpStatusCode.InternalServerError);
 
                 await context.Response.WriteAsJsonAsync(responseBody, new JsonSerializerOptions()
