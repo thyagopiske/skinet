@@ -14,6 +14,16 @@ builder.Services.AddSwaggerDocumentation();
 
 builder.Services.AddApplicationServicesExtensions();
 
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy("CorsPolicy", policy =>
+    {
+        policy.AllowAnyHeader()
+              .AllowAnyMethod()
+              .WithOrigins("https://localhost:4200");
+    });
+});
+
 //Database connection
 builder.Services.AddDbContext<StoreContext>(op =>
 {
@@ -59,6 +69,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseAuthorization();
+
+app.UseCors("CorsPolicy");
 
 app.MapControllers();
 
