@@ -20,11 +20,13 @@ namespace Core.Specifications
 
         public Expression<Func<T, bool>> Criteria { get; }
 
-        public List<Expression<Func<T, object>>> Includes { get; } = new List<Expression<Func<T, object>>>();
+        public List<string> IncludeStrings { get; } = new List<string>();
 
         protected void AddInclude(Expression<Func<T, object>> includeExpression)
         {
-            Includes.Add(includeExpression);
+            //expression product => product.Category.TipoFilho vira Category.TipoFilho
+            string expressionString = String.Join(".", includeExpression.Body.ToString().Split('.').Skip(1));
+            IncludeStrings.Add(expressionString);
         }
     }
 }
